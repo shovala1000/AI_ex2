@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9bb05f17-fd0d-4d0b-9994-85a25ad46e0b" name="Changes" comment="helper step">
+    <list default="true" id="9bb05f17-fd0d-4d0b-9994-85a25ad46e0b" name="Changes" comment="todo: continue the training part and then do the play">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ex2.py" beforeDir="false" afterPath="$PROJECT_DIR$/ex2.py" afterDir="false" />
     </list>
@@ -16,9 +16,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2dT7woAtPJYi4k7rSOQDbd3qTkw" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -27,8 +27,9 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Python.check.executor": "Debug",
-    "Python.ex2.executor": "Debug",
+    "Python.check.executor": "Run",
+    "Python.ex2.executor": "Run",
+    "Python.grid_world.executor": "Run",
     "Python.pacman.executor": "Debug",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true"
@@ -71,22 +72,37 @@
       <option name="project" value="LOCAL" />
       <updated>1710179576303</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="todo: continue the training part and then do the play">
+      <option name="closed" value="true" />
+      <created>1710182201632</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1710182201632</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Global vars init" />
     <MESSAGE value="helper step" />
-    <option name="LAST_COMMIT_MESSAGE" value="helper step" />
+    <MESSAGE value="todo: continue the training part and then do the play" />
+    <option name="LAST_COMMIT_MESSAGE" value="todo: continue the training part and then do the play" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ex2.py</url>
-          <line>69</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/check.py</url>
           <line>10</line>
