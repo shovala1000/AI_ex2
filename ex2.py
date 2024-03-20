@@ -46,7 +46,7 @@ EPSILON = 1
 EPISODES = 2
 ALPHA = 0.8
 GAMMA = 0.95
-ACTIONS = {LEFT: (-1, 0), DOWN: (0, 1), RIGHT: (1, 0), UP: (0, -1)}
+ACTIONS = {UP: (-1, 0), RIGHT: (0, 1), DOWN: (1, 0), LEFT: (0, -1)}
 
 
 def create_board(N, M, init_locations, init_pellets):
@@ -91,13 +91,15 @@ def max_actions_and_values(arm_rewards):
     return max_reward_arm
 
 
-def get_neighboring_states(state, q_table, N, M):
+def get_neighboring_states(state, N, M):
     neighboring_states = []
-    for (dx, dy), action in q_table:
+    actions = []
+    for action, (dx, dy) in ACTIONS.items():
         new_i, new_j = state[0] + dx, state[1] + dy
         if 0 <= new_i < N and 0 <= new_j < M:
             neighboring_states.append((new_i, new_j))
-    return neighboring_states
+            actions.append(action)
+    return actions, neighboring_states
 
 
 def print_training_progress(episode_rewards, training_start, training_end, episode_steps):
@@ -152,27 +154,33 @@ def run_Q_learning(env, steps, q_table):
     # solve the environment over certain amount of episodes
     for episode in range(EPISODES):
         # reset the environment, rewards, and steps for the new episode
-        s = env.reset()
+        env.reset()
+        s = env.init_locations[KEY_PACMAN]
         episode_reward = 0
         step = 0
 
         # find the solution over certain amount of attempts (steps in each episode)
         while step < steps:
-
-            # select the action in the current state by running the multiarmed bandit
-            a = run_epsilon_greedy(q_table[s, :], BANDIT_ARMS, BANDIT_TRAINING, EPSILON, episode)
+            arms, states = get_neighboring_states(s, 5, 5)  # todo N,M
+            arm_rewards = {}
+            for i in range(len(arms)):
+                current = (states[i], arms[i])
+                arm_rewards[current] = q_table[current]
+                # select the action in the current state by running the multiarmed bandit
+            a = run_epsilon_greedy(arm_rewards, arms, BANDIT_TRAINING, EPSILON, episode)
 
             # enter the environment and get the experience from it by performing there an action
             # -> get the observation (new state), reward, done (success/failure), and information
 
             # (observation, reward, done, info)
-            reward = env.update_board(a)
+            reward = env.update_board(ACTIONS[a])
             observation = (s[0] + ACTIONS[a][0], s[1] + ACTIONS[a][1])
             actions_and_values = {action: value for (state, action), value in q_table.items() if state == observation}
             max_action_q_s_tag = max_actions_and_values(actions_and_values)
             # update the Q-value for the current state and action
             # -> calculate this Q-value using its previous value & the experience from the environment
-            q_table[s, a] = q_table[s, a] + ALPHA * (reward + GAMMA * max_action_q_s_tag - q_table[s, a])
+            q_table[s, a] = q_table[s, a] + ALPHA * (
+                        reward + GAMMA * actions_and_values[max_action_q_s_tag] - q_table[s, a])
 
             # add the reward to others during this episode
             episode_reward += reward
@@ -211,7 +219,6 @@ class Controller:
         # Hyperparameters
         self.episodes = EPISODES
         self.steps = steps
-        self.bandit_arms = BANDIT_ARMS
         self.is_training = BANDIT_TRAINING
         self.epsilon = EPSILON
         self.alpha = ALPHA
