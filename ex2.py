@@ -43,7 +43,7 @@ LOST = -10
 BANDIT_ARMS = 4
 BANDIT_TRAINING = True
 EPSILON = 1
-EPISODES = 2
+EPISODES = 2000
 ALPHA = 0.8
 GAMMA = 0.95
 ACTIONS = {UP: (-1, 0), RIGHT: (0, 1), DOWN: (1, 0), LEFT: (0, -1)}
@@ -72,7 +72,16 @@ def create_q_table(N, M, actions_keys):
     q_table = {}
     for i in range(N):
         for j in range(M):
-            for action in actions_keys:
+            actions_keys_copy = list(actions_keys)
+            if i == 0:
+                actions_keys_copy.remove(UP)
+            elif i == N - 1:
+                actions_keys_copy.remove(DOWN)
+            if j == 0:
+                actions_keys_copy.remove(LEFT)
+            elif j == M - 1:
+                actions_keys_copy.remove(RIGHT)
+            for action in actions_keys_copy:
                 q_table[((i, j), action)] = 0
 
     # for row in q_table:
@@ -80,7 +89,7 @@ def create_q_table(N, M, actions_keys):
     return q_table
 
 
-def max_actions_and_values(arm_rewards):
+def max_reward_action(arm_rewards):
     max_value = max(arm_rewards.values())
     max_actions = [action for action, value in arm_rewards.items() if value == max_value]
     if len(max_actions) == 1:
@@ -113,7 +122,7 @@ def print_training_progress(episode_rewards, training_start, training_end, episo
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
     ax1.plot(episode_rewards, '-g', label='reward')
-    ax1.set_yticks([0, 1])
+    ax1.set_yticks([-10, 10])
     ax2 = ax1.twinx()
     ax2.plot(episode_steps, '+r', label='step')
     ax1.set_xlabel("episode")
@@ -125,7 +134,7 @@ def print_training_progress(episode_rewards, training_start, training_end, episo
     plt.show()
 
 
-def run_epsilon_greedy(arm_rewards, arms, is_training, epsilon, episode):
+def run_epsilon_greedy(arm_rewards, is_training, epsilon, episode):
     # check if bandit is used for training
     if is_training:
         # -> start with the full exploration and slowly reduce it as this algorithm learns
@@ -135,17 +144,17 @@ def run_epsilon_greedy(arm_rewards, arms, is_training, epsilon, episode):
     # select the arm
     if random_num > epsilon:
         # Exploit -> find arms with the highest rewards
-        max_reward_arm = max_actions_and_values(arm_rewards)
+        max_reward_arm = max_reward_action(arm_rewards)
     else:
         # Explore -> randomly choose an arm
-        max_reward_arm = random.choice(arms)
+        max_reward_arm = random.choice(list(arm_rewards.keys()))
 
     return max_reward_arm
 
 
 def run_Q_learning(env, steps, q_table):
     # log the training start
-    training_start = time()
+    # training_start = time()
 
     # store the training progress of this algorithm for each episode
     episode_rewards = []
@@ -161,33 +170,6 @@ def run_Q_learning(env, steps, q_table):
 
         # find the solution over certain amount of attempts (steps in each episode)
         while step < steps:
-            arms, states = get_neighboring_states(s, 5, 5)  # todo N,M
-            arm_rewards = {}
-            for i in range(len(arms)):
-                current = (states[i], arms[i])
-                arm_rewards[current] = q_table[current]
-                # select the action in the current state by running the multiarmed bandit
-            a = run_epsilon_greedy(arm_rewards, arms, BANDIT_TRAINING, EPSILON, episode)
-
-            # enter the environment and get the experience from it by performing there an action
-            # -> get the observation (new state), reward, done (success/failure), and information
-
-            # (observation, reward, done, info)
-            reward = env.update_board(ACTIONS[a])
-            observation = (s[0] + ACTIONS[a][0], s[1] + ACTIONS[a][1])
-            actions_and_values = {action: value for (state, action), value in q_table.items() if state == observation}
-            max_action_q_s_tag = max_actions_and_values(actions_and_values)
-            # update the Q-value for the current state and action
-            # -> calculate this Q-value using its previous value & the experience from the environment
-            q_table[s, a] = q_table[s, a] + ALPHA * (
-                        reward + GAMMA * actions_and_values[max_action_q_s_tag] - q_table[s, a])
-
-            # add the reward to others during this episode
-            episode_reward += reward
-
-            # change the state to the observed state for the next iteration
-            s = observation
-
             # check if the environment has been exited
             if env.done:
                 # -> store the collected rewards & number of steps in this episode
@@ -196,12 +178,35 @@ def run_Q_learning(env, steps, q_table):
                 # -> quit the episode
                 break
 
+            arm_rewards = {action: value for (state, action), value in q_table.items() if state == s}
+
+            # select the action in the current state by running the multiarmed bandit
+            a = run_epsilon_greedy(arm_rewards, BANDIT_TRAINING, EPSILON, episode)
+
+            reward = env.update_board(ACTIONS[a])
+
+            s_tag = (s[0] + ACTIONS[a][0], s[1] + ACTIONS[a][1])
+
+            actions_and_values = {action: value for (state, action), value in q_table.items() if state == s_tag}
+            max_action_s_tag = max_reward_action(actions_and_values)
+
+            # update the Q-value for the current state and action
+            # -> calculate this Q-value using its previous value & the experience from the environment
+            q_table[s, a] = q_table[s, a] + ALPHA * (
+                    reward + GAMMA * actions_and_values[max_action_s_tag] - q_table[s, a])
+
+            # add the reward to others during this episode
+            episode_reward += reward
+
+            # change the state to the observed state for the next iteration
+            s = s_tag
+
             # continue looping
             step += 1
 
     # log the training end
-    training_end = time()
-    print_training_progress(episode_rewards, training_start, training_end, episode_steps)
+    # training_end = time()
+    # print_training_progress(episode_rewards, training_start, training_end, episode_steps)
 
 
 class Controller:
@@ -234,8 +239,8 @@ class Controller:
 
         # Training using Q-learning
         run_Q_learning(self.env, steps, self.q_table)
-        for row in self.q_table:
-            print(row)
+        # for key, value in self.q_table.items():
+        #     print("Q[" + str(key) + "]: " + str(value))
 
         self.episodes = 10
         self.is_training = False
@@ -248,4 +253,8 @@ class Controller:
         """
         s = locations[KEY_PACMAN]
         actions_and_values = {action: value for (state, action), value in self.q_table.items() if state == s}
-        return max_actions_and_values(actions_and_values)
+        a = run_epsilon_greedy(actions_and_values, self.is_training, self.epsilon, None)
+        return a
+        # todo: this: return max_reward_action(actions_and_values) or greedy
+
+
