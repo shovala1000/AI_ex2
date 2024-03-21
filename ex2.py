@@ -78,29 +78,6 @@ def max_reward_action(arm_rewards):
     return max_reward_arm
 
 
-def print_training_progress(episode_rewards, training_start, training_end, episode_steps):
-    # show the success rate for solving the environment & elapsed training time
-    success_rate = round((sum(episode_rewards) / EPISODES) * 100, 2)
-    elapsed_training_time = int(training_end - training_start)
-    print("\nThis environment has been solved", str(success_rate), "% of times over", str(EPISODES), "episodes within",
-          str(elapsed_training_time), "seconds!")
-
-    # plot the rewards and number of steps over all training episodes
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-    ax1.plot(episode_rewards, '-g', label='reward')
-    ax1.set_yticks([-10, 10])
-    ax2 = ax1.twinx()
-    ax2.plot(episode_steps, '+r', label='step')
-    ax1.set_xlabel("episode")
-    ax1.set_ylabel("reward")
-    ax2.set_ylabel("step")
-    ax1.legend(loc=2)
-    ax2.legend(loc=1)
-    plt.title("Training Progress")
-    plt.show()
-
-
 def run_epsilon_greedy(arm_rewards, is_training, epsilon, episode):
     # check if bandit is used for training
     if is_training:
@@ -120,9 +97,6 @@ def run_epsilon_greedy(arm_rewards, is_training, epsilon, episode):
 
 
 def run_Q_learning(env, steps, q_table):
-    # log the training start
-    # training_start = time()
-
     # store the training progress of this algorithm for each episode
     episode_rewards = []
     episode_steps = []
@@ -171,48 +145,6 @@ def run_Q_learning(env, steps, q_table):
             # continue looping
             step += 1
 
-    # log the training end
-    # training_end = time()
-    # print_training_progress(episode_rewards, training_start, training_end, episode_steps)
-
-
-def print_q_table(q_table):
-    for x in range(5):
-        actions = {UP: [-9, -9, -9, -9, -9],
-                   DOWN: [-9, -9, -9, -9, -9],
-                   LEFT: [-9, -9, -9, -9, -9],
-                   RIGHT: [-9, -9, -9, -9, -9]}
-        for y in range(5):
-            state = (x, y)
-            for action in actions.keys():
-                if (state, action) in q_table:
-                    actions[action][y] = q_table[(state, action)]
-        for i in range(5):
-            if actions[UP][i] >= 0:
-                print(f"|UP = {actions[UP][i]:.3f}      ", end='')
-            else:
-                print(f"|UP = {actions[UP][i]:.3f}     ", end='')
-        print()
-        for i in range(5):
-            if actions[DOWN][i] >= 0:
-                print(f"|DOWN = {actions[DOWN][i]:.3f}    ", end='')
-            else:
-                print(f"|DOWN = {actions[DOWN][i]:.3f}   ", end='')
-        print()
-        for i in range(5):
-            if actions[LEFT][i] >= 0:
-                print(f"|LEFT = {actions[LEFT][i]:.3f}    ", end='')
-            else:
-                print(f"|LEFT = {actions[LEFT][i]:.3f}   ", end='')
-        print()
-        for i in range(5):
-            if actions[RIGHT][i] >= 0:
-                print(f"|RIGHT = {actions[RIGHT][i]:.3f}   ", end='')
-            else:
-                print(f"|RIGHT = {actions[RIGHT][i]:.3f}  ", end='')
-        print(
-            "\n---------------------------------------------------------------------------------------------------------")
-
 
 class Controller:
     "This class is a controller for a Pacman game."
@@ -244,13 +176,10 @@ class Controller:
 
         # Training using Q-learning
         run_Q_learning(self.env, steps, self.q_table)
-        print_q_table(self.q_table)
-        # for key, value in self.q_table.items():
-        #     print("Q[" + str(key) + "]: " + str(value))
 
+        # setting the agent for pure exploitation -> use only learned Q values from training
         self.episodes = 10
         self.is_training = False
-        # setting the agent for pure exploitation -> use only learned Q values from training
         self.epsilon = 0
 
     def choose_next_move(self, locations, pellets):
@@ -259,7 +188,4 @@ class Controller:
         """
         s = locations[KEY_PACMAN]
         actions_and_values = {action: value for (state, action), value in self.q_table.items() if state == s}
-        # a = run_epsilon_greedy(actions_and_values, self.is_training, self.epsilon, None)
-        # return a
         return max_reward_action(actions_and_values)
-        # todo: this: return max_reward_action(actions_and_values) or greedy

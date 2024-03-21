@@ -17,7 +17,7 @@ def evaluate(board, steps, p=0.7):
 
     t3 = time.time()
     print("The average score for the problem is:",
-          run_pacman.evaluate_policy(controller, p, 30, visualize=False))
+          run_pacman.evaluate_policy(controller, p, 30, visualize=True))
     t4 = time.time()
     print("Controller evaluation took: ", t4 - t3, " seconds")
 
