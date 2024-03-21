@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9bb05f17-fd0d-4d0b-9994-85a25ad46e0b" name="Changes" comment="pseudocode done">
+    <list default="true" id="9bb05f17-fd0d-4d0b-9994-85a25ad46e0b" name="Changes" comment="fixed, need to check q_table after training and delete print_training_progress function">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/check.py" beforeDir="false" afterPath="$PROJECT_DIR$/check.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ex2.py" beforeDir="false" afterPath="$PROJECT_DIR$/ex2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pacman.py" beforeDir="false" afterPath="$PROJECT_DIR$/pacman.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,7 +91,23 @@
       <option name="project" value="LOCAL" />
       <updated>1710442702400</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Takes the wrong actions and rewards in run_Q_learning function">
+      <option name="closed" value="true" />
+      <created>1710947161859</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1710947161859</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fixed, need to check q_table after training and delete print_training_progress function">
+      <option name="closed" value="true" />
+      <created>1710953229292</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1710953229292</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -108,7 +126,9 @@
     <MESSAGE value="helper step" />
     <MESSAGE value="todo: continue the training part and then do the play" />
     <MESSAGE value="pseudocode done" />
-    <option name="LAST_COMMIT_MESSAGE" value="pseudocode done" />
+    <MESSAGE value="Takes the wrong actions and rewards in run_Q_learning function" />
+    <MESSAGE value="fixed, need to check q_table after training and delete print_training_progress function" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed, need to check q_table after training and delete print_training_progress function" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

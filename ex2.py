@@ -1,24 +1,13 @@
 import math
-from time import time
 import random
+from time import time
+
 import matplotlib.pyplot as plt
 import pacman
 
 id = ["206626681"]
 
-""" Rules """
-WALL = 99
-PACMAN = 70
-RED_DOT = 21
-RED = 20
-BLUE_DOT = 31
-BLUE = 30
-YELLOW_DOT = 41
-YELLOW = 40
-GREEN_DOT = 51
-GREEN = 50
-DOT = 11
-EMPTY_SLOT = 10
+""" Action keys """
 RIGHT = "R"
 LEFT = "L"
 DOWN = "D"
@@ -31,18 +20,7 @@ KEY_YELLOW = 4
 KEY_BLUE = 3
 KEY_RED = 2
 
-""" Invalid state """
-INVALID_STATE = "Error!!"
-
-""" Points """
-EAT_DOT = 1
-WIN = 10
-LOST = -10
-
 """ hyperparameters """
-BANDIT_ARMS = 4
-BANDIT_TRAINING = True
-EPSILON = 1
 EPISODES = 2000
 ALPHA = 0.8
 GAMMA = 0.95
@@ -98,17 +76,6 @@ def max_reward_action(arm_rewards):
         # randomly choose an arm from the best arms
         max_reward_arm = random.choice(max_actions)
     return max_reward_arm
-
-
-def get_neighboring_states(state, N, M):
-    neighboring_states = []
-    actions = []
-    for action, (dx, dy) in ACTIONS.items():
-        new_i, new_j = state[0] + dx, state[1] + dy
-        if 0 <= new_i < N and 0 <= new_j < M:
-            neighboring_states.append((new_i, new_j))
-            actions.append(action)
-    return actions, neighboring_states
 
 
 def print_training_progress(episode_rewards, training_start, training_end, episode_steps):
@@ -181,7 +148,7 @@ def run_Q_learning(env, steps, q_table):
             arm_rewards = {action: value for (state, action), value in q_table.items() if state == s}
 
             # select the action in the current state by running the multiarmed bandit
-            a = run_epsilon_greedy(arm_rewards, BANDIT_TRAINING, EPSILON, episode)
+            a = run_epsilon_greedy(arm_rewards, True, 1, episode)
 
             reward = env.update_board(ACTIONS[a])
 
@@ -209,6 +176,44 @@ def run_Q_learning(env, steps, q_table):
     # print_training_progress(episode_rewards, training_start, training_end, episode_steps)
 
 
+def print_q_table(q_table):
+    for x in range(5):
+        actions = {UP: [-9, -9, -9, -9, -9],
+                   DOWN: [-9, -9, -9, -9, -9],
+                   LEFT: [-9, -9, -9, -9, -9],
+                   RIGHT: [-9, -9, -9, -9, -9]}
+        for y in range(5):
+            state = (x, y)
+            for action in actions.keys():
+                if (state, action) in q_table:
+                    actions[action][y] = q_table[(state, action)]
+        for i in range(5):
+            if actions[UP][i] >= 0:
+                print(f"|UP = {actions[UP][i]:.3f}      ", end='')
+            else:
+                print(f"|UP = {actions[UP][i]:.3f}     ", end='')
+        print()
+        for i in range(5):
+            if actions[DOWN][i] >= 0:
+                print(f"|DOWN = {actions[DOWN][i]:.3f}    ", end='')
+            else:
+                print(f"|DOWN = {actions[DOWN][i]:.3f}   ", end='')
+        print()
+        for i in range(5):
+            if actions[LEFT][i] >= 0:
+                print(f"|LEFT = {actions[LEFT][i]:.3f}    ", end='')
+            else:
+                print(f"|LEFT = {actions[LEFT][i]:.3f}   ", end='')
+        print()
+        for i in range(5):
+            if actions[RIGHT][i] >= 0:
+                print(f"|RIGHT = {actions[RIGHT][i]:.3f}   ", end='')
+            else:
+                print(f"|RIGHT = {actions[RIGHT][i]:.3f}  ", end='')
+        print(
+            "\n---------------------------------------------------------------------------------------------------------")
+
+
 class Controller:
     "This class is a controller for a Pacman game."
 
@@ -224,8 +229,8 @@ class Controller:
         # Hyperparameters
         self.episodes = EPISODES
         self.steps = steps
-        self.is_training = BANDIT_TRAINING
-        self.epsilon = EPSILON
+        self.is_training = True
+        self.epsilon = 1
         self.alpha = ALPHA
         self.gamma = GAMMA
 
@@ -239,6 +244,7 @@ class Controller:
 
         # Training using Q-learning
         run_Q_learning(self.env, steps, self.q_table)
+        print_q_table(self.q_table)
         # for key, value in self.q_table.items():
         #     print("Q[" + str(key) + "]: " + str(value))
 
@@ -253,8 +259,7 @@ class Controller:
         """
         s = locations[KEY_PACMAN]
         actions_and_values = {action: value for (state, action), value in self.q_table.items() if state == s}
-        a = run_epsilon_greedy(actions_and_values, self.is_training, self.epsilon, None)
-        return a
+        # a = run_epsilon_greedy(actions_and_values, self.is_training, self.epsilon, None)
+        # return a
+        return max_reward_action(actions_and_values)
         # todo: this: return max_reward_action(actions_and_values) or greedy
-
-

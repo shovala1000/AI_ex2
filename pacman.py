@@ -103,7 +103,9 @@ class Game:
                 reward += self.update_board(self.actions[random.choice(moves)])
             
             if visualize:
-                print(self.board)
+                print("reward: "+ str(reward))
+                for row in self.board:
+                    print(row)
                                            
         return reward
 
