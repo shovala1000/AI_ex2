@@ -1,8 +1,5 @@
 import math
 import random
-from time import time
-
-import matplotlib.pyplot as plt
 import pacman
 
 id = ["206626681"]
@@ -15,10 +12,6 @@ UP = "U"
 
 """ Locations keys """
 KEY_PACMAN = 7
-KEY_GREEN = 5
-KEY_YELLOW = 4
-KEY_BLUE = 3
-KEY_RED = 2
 
 """ hyperparameters """
 EPISODES = 2000
@@ -45,7 +38,8 @@ def create_board(N, M, init_locations, init_pellets):
 
 def create_q_table(N, M, actions_keys):
     """
-    Initialize Q-table and other necessary variables.
+    Initialize Q-table all zero, only when to move is in the board
+    ("smart" table - without illegal moves)
     """
     q_table = {}
     for i in range(N):
@@ -62,12 +56,13 @@ def create_q_table(N, M, actions_keys):
             for action in actions_keys_copy:
                 q_table[((i, j), action)] = 0
 
-    # for row in q_table:
-    #     print(row)
     return q_table
 
 
 def max_reward_action(arm_rewards):
+    """
+    Return the arm with the max q_value. In tie choose randomly.
+    """
     max_value = max(arm_rewards.values())
     max_actions = [action for action, value in arm_rewards.items() if value == max_value]
     if len(max_actions) == 1:
@@ -79,44 +74,42 @@ def max_reward_action(arm_rewards):
 
 
 def run_epsilon_greedy(arm_rewards, is_training, epsilon, episode):
+    """
+    epsilon greedy algorithm.
+    """
     # check if bandit is used for training
     if is_training:
-        # -> start with the full exploration and slowly reduce it as this algorithm learns
+        # start with the full exploration and slowly reduce it as this algorithm learns
         epsilon = math.exp(-0.01 * episode)
         # flip the coin (randomly select the number between 0 and 1)
     random_num = random.random()
     # select the arm
     if random_num > epsilon:
-        # Exploit -> find arms with the highest rewards
+        # Exploit - find arms with the highest rewards
         max_reward_arm = max_reward_action(arm_rewards)
     else:
-        # Explore -> randomly choose an arm
+        # Explore - randomly choose an arm
         max_reward_arm = random.choice(list(arm_rewards.keys()))
 
     return max_reward_arm
 
 
 def run_Q_learning(env, steps, q_table):
-    # store the training progress of this algorithm for each episode
-    episode_rewards = []
-    episode_steps = []
-
+    """
+    Q-learning algorithm, using epsilon-greedy algorithm.
+    """
     # solve the environment over certain amount of episodes
     for episode in range(EPISODES):
         # reset the environment, rewards, and steps for the new episode
         env.reset()
         s = env.init_locations[KEY_PACMAN]
-        episode_reward = 0
         step = 0
 
         # find the solution over certain amount of attempts (steps in each episode)
         while step < steps:
             # check if the environment has been exited
             if env.done:
-                # -> store the collected rewards & number of steps in this episode
-                episode_rewards.append(episode_reward)
-                episode_steps.append(step)
-                # -> quit the episode
+                # quit the episode
                 break
 
             arm_rewards = {action: value for (state, action), value in q_table.items() if state == s}
@@ -132,12 +125,8 @@ def run_Q_learning(env, steps, q_table):
             max_action_s_tag = max_reward_action(actions_and_values)
 
             # update the Q-value for the current state and action
-            # -> calculate this Q-value using its previous value & the experience from the environment
             q_table[s, a] = q_table[s, a] + ALPHA * (
                     reward + GAMMA * actions_and_values[max_action_s_tag] - q_table[s, a])
-
-            # add the reward to others during this episode
-            episode_reward += reward
 
             # change the state to the observed state for the next iteration
             s = s_tag
