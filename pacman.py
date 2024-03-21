@@ -46,7 +46,6 @@ class Game:
     
     def move_pacman(self, move):    
         move_check = move[0] + self.locations[7][0], move[1] + self.locations[7][1]
-        
         if not self.there_is_cell(move_check) or self.board[move_check[0]][move_check[1]] >= 89:
             return 0
         

@@ -20,14 +20,15 @@ GAMMA = 0.95
 ACTIONS = {UP: (-1, 0), RIGHT: (0, 1), DOWN: (1, 0), LEFT: (0, -1)}
 
 
-def create_board(N, M, init_locations, init_pellets):
+def create_board(rows, cols, init_locations, init_pellets):
     """
     Create a new board based on the initial locations and pellets.
 
     Returns:
     - A new board representing the environment
     """
-    board = [[10] * M for _ in range(N)]
+    board = [[10] * cols for _ in range(rows)]
+
     for key, value in init_locations.items():
         if value:
             board[value[0]][value[1]] = key * 10
@@ -36,22 +37,22 @@ def create_board(N, M, init_locations, init_pellets):
     return board
 
 
-def create_q_table(N, M, actions_keys):
+def create_q_table(rows, cols, actions_keys):
     """
     Initialize Q-table all zero, only when to move is in the board
     ("smart" table - without illegal moves)
     """
     q_table = {}
-    for i in range(N):
-        for j in range(M):
+    for i in range(rows):
+        for j in range(cols):
             actions_keys_copy = list(actions_keys)
             if i == 0:
                 actions_keys_copy.remove(UP)
-            elif i == N - 1:
+            elif i == rows - 1:
                 actions_keys_copy.remove(DOWN)
             if j == 0:
                 actions_keys_copy.remove(LEFT)
-            elif j == M - 1:
+            elif j == cols - 1:
                 actions_keys_copy.remove(RIGHT)
             for action in actions_keys_copy:
                 q_table[((i, j), action)] = 0
@@ -156,12 +157,12 @@ class Controller:
         self.gamma = GAMMA
 
         # Initialize game environment for visualization
-        self.env = pacman.Game(steps, create_board(N, M, init_locations, init_pellets))
+        self.env = pacman.Game(steps, create_board(M, N, init_locations, init_pellets))
         self.states = []  # all possible states
         self.actions = ACTIONS
 
         # Initialize Q-table with zeros
-        self.q_table = create_q_table(N, M, self.actions.keys())
+        self.q_table = create_q_table(M, N, self.actions.keys())
 
         # Training using Q-learning
         run_Q_learning(self.env, steps, self.q_table)
